@@ -34,7 +34,7 @@ sd_current_checkpoint: str = ""
 sd_vaes: List[str] = []
 sd_current_vae: str = ""
 
-sd_connected: bool = True
+sd_connected: bool = False
 sd_options: Any = None
 
 
@@ -58,6 +58,8 @@ def render_ui(params: Params) -> None:
         _render_faceid_config(params)
         _render_ipadapter_config(params)
 
+def isSdConnected():
+    return sd_connected
 
 def _render_connection_details(params: Params) -> None:
     global refresh_button
@@ -657,8 +659,8 @@ def _refresh_sd_data(params: Params, force_refetch: bool = False) -> None:
     if sd_connected and (force_refetch or len(sd_vaes) == 0):
         _fetch_vaes(sd_client)
 
-    for listener in connect_listeners:
-        listener.set_visibility(sd_connected)
+    #for listener in connect_listeners:
+    #    listener.set_visibility(sd_connected)
 
     if not sd_connected:
         _set_status("Stable Diffusion WebUI connection failed", STATUS_FAILURE)

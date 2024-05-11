@@ -22,7 +22,7 @@ from .params import (
     TriggerMode,
 )
 from .sd_client import SdWebUIApi
-from .ui import render_ui
+from .ui import render_ui, isSdConnected
 
 ui_params: Any = StableDiffusionWebUiExtensionParams()
 params = asdict(ui_params)
@@ -122,7 +122,7 @@ def state_modifier(state: dict) -> dict:
 
     context = get_or_create_context(state)
 
-    if context is None or context.is_completed:
+    if context is None or context.is_completed or not isSdConnected():
         return state
 
     if (
@@ -176,7 +176,7 @@ def output_modifier(string: str, state: dict, is_chat: bool = False) -> str:
 
     global params
 
-    if not is_chat:
+    if not is_chat or not isSdConnected():
         cleanup_context()
         return string
 
