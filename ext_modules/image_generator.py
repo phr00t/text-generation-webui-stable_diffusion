@@ -31,7 +31,7 @@ def normalize_regex(regex: str) -> str:
     return regex
 
 def extract_image_parameters(text):
-    pattern = r'create_image\((\"?)(.*?)(\"?)\)'
+    pattern = r'createimage\((\"?)(.*?)(\"?)\)'
     match = re.search(pattern, text, re.IGNORECASE)
     if match:
         return match.group(2)

@@ -36,6 +36,9 @@ cached_schema_logits: LogitsProcessor | None = None
 
 EXTENSION_DIRECTORY_NAME = path.basename(path.dirname(path.realpath(__file__)))
 
+def remove_image_parameters(text):
+    pattern = r'createimage\((\"?)(.*?)(\"?)\)'
+    return re.sub(pattern, '', text, re.IGNORECASE)
 
 def get_or_create_context(state: dict | None = None) -> GenerationContext:
     global context, params, ui_params
@@ -178,7 +181,7 @@ def output_modifier(string: str, state: dict, is_chat: bool = False) -> str:
 
     if not is_chat or not isSdConnected():
         cleanup_context()
-        return string
+        return html.unescape(string)
 
     context = get_current_context()
 
@@ -211,10 +214,10 @@ def output_modifier(string: str, state: dict, is_chat: bool = False) -> str:
 
     if context is None or context.is_completed:
         cleanup_context()
-        return string
+        return remove_image_parameters(html.unescape(string))
 
     context.state = state
-    context.output_text = string
+    context.output_text = html.unescape(string)
 
     if "<img " in string:
         cleanup_context()
@@ -234,14 +237,14 @@ def output_modifier(string: str, state: dict, is_chat: bool = False) -> str:
                     == InteractiveModePromptGenerationMode.DYNAMIC
                 )
             ):
-                string = f"{string}\n*{html.escape(prompt).strip()}*"
+                string = string  # f"{string}\n*{html.escape(prompt).strip()}*"
 
     except Exception as e:
         string += "\n\n*Image generation has failed. Check logs for errors.*"
         logger.error(e, exc_info=True)
 
     cleanup_context()
-    return string
+    return remove_image_parameters(html.unescape(string))
 
 
 def logits_processor_modifier(processor_list: List[LogitsProcessor], input_ids):
