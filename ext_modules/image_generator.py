@@ -30,6 +30,13 @@ def normalize_regex(regex: str) -> str:
 
     return regex
 
+def extract_image_parameters(text):
+    pattern = r'create_image\((\"?)(.*?)(\"?)\)'
+    match = re.search(pattern, text, re.IGNORECASE)
+    if match:
+        return match.group(2)
+    else:
+        return ""
 
 def normalize_prompt(prompt: str) -> str:
     if prompt is None:
@@ -212,13 +219,17 @@ def generate_html_images_for_context(
         == InteractiveModePromptGenerationMode.GENERATED_TEXT
         or InteractiveModePromptGenerationMode.DYNAMIC
     ):
-        context_prompt = html.unescape(output_text or "")
+        context_prompt = extract_image_parameters(html.unescape(output_text or ""))
+        if context_prompt == "":
+            context_prompt = html.unescape(output_text or "")
 
     if context.params.trigger_mode == TriggerMode.CONTINUOUS and (
         context.params.continuous_mode_prompt_generation_mode
         == ContinuousModePromptGenerationMode.GENERATED_TEXT
     ):
-        context_prompt = html.unescape(output_text or "")
+        context_prompt = extract_image_parameters(html.unescape(output_text or ""))
+        if context_prompt == "":
+            context_prompt = html.unescape(output_text or "")
 
     if context.params.trigger_mode == TriggerMode.TOOL:
         output_text = html.unescape(output_text or "").strip()
